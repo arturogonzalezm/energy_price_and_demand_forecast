@@ -1,2 +1,3 @@
-# energy_price_and_demand_forecast
+# Energy Price and Demand Forecast
+
 AEMO Aggregated price and demand data
