@@ -1,3 +1,6 @@
+"""
+This module contains the unit tests for the DataLoader class.
+"""
 import pytest
 from unittest.mock import patch, MagicMock
 from pyspark.sql import DataFrame
@@ -8,6 +11,10 @@ from src.utils.spark_session import SparkSessionManager
 
 @pytest.fixture
 def mock_spark_session():
+    """
+    Create a mock SparkSession object for testing.
+    :return:
+    """
     with patch.object(SparkSessionManager, 'get_instance') as mock_get_instance:
         mock_spark = MagicMock()
         mock_get_instance.return_value = mock_spark
@@ -15,6 +22,11 @@ def mock_spark_session():
 
 
 def create_mock_dataframe(data):
+    """
+    Create a mock DataFrame object for testing.
+    :param data:
+    :return:
+    """
     df = MagicMock(spec=DataFrame)
     df.union = MagicMock(return_value=df)
     return df
@@ -23,6 +35,11 @@ def create_mock_dataframe(data):
 class TestDataLoader:
 
     def test_read_csv_files(self, mock_spark_session):
+        """
+        Test the read_csv_files method.
+        :param mock_spark_session:
+        :return:
+        """
         # Arrange
         file_paths = ['file1.csv', 'file2.csv', 'file3.csv']
         mock_dataframes = [create_mock_dataframe(f"data{i}") for i in range(len(file_paths))]
@@ -40,6 +57,11 @@ class TestDataLoader:
         assert mock_dataframes[0].union.call_count == len(file_paths) - 1
 
     def test_read_parquet_files(self, mock_spark_session):
+        """
+        Test the read_parquet_files method.
+        :param mock_spark_session:
+        :return:
+        """
         # Arrange
         file_paths = ['file1.parquet', 'file2.parquet', 'file3.parquet']
         mock_dataframes = [create_mock_dataframe(f"data{i}") for i in range(len(file_paths))]
@@ -57,6 +79,11 @@ class TestDataLoader:
         assert mock_dataframes[0].union.call_count == len(file_paths) - 1
 
     def test_read_csv_files_empty_list(self, mock_spark_session):
+        """
+        Test the read_csv_files method with an empty list of file paths.
+        :param mock_spark_session:
+        :return:
+        """
         # Arrange
         file_paths = []
 
@@ -65,6 +92,11 @@ class TestDataLoader:
             DataLoader.read_csv_files(file_paths)
 
     def test_read_parquet_files_empty_list(self, mock_spark_session):
+        """
+        Test the read_parquet_files method with an empty list of file paths.
+        :param mock_spark_session:
+        :return:
+        """
         # Arrange
         file_paths = []
 

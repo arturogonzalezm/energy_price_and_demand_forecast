@@ -16,6 +16,12 @@ class SingletonLogger:
     DEFAULT_FORMAT = "%(asctime)s - %(threadName)s - %(levelname)s - %(message)s"
 
     def __new__(cls, logger_name=None, log_level=logging.DEBUG, log_format=None):
+        """
+        Create a new instance of the SingletonLogger class if one does not already exist.
+        :param logger_name:
+        :param log_level:
+        :param log_format:
+        """
         if not cls._instance:
             with cls._lock:
                 if not cls._instance:
@@ -26,7 +32,13 @@ class SingletonLogger:
         return cls._instance
 
     def _initialize_logger(self, logger_name, log_level, log_format):
-        """Initialize the logger with the given parameters."""
+        """
+        Initialize the logger instance.
+        :param logger_name:
+        :param log_level:
+        :param log_format:
+        :return:
+        """
         self._logger = logging.getLogger(logger_name or self.__class__.__name__)
         self._logger.setLevel(log_level)
         self._log_level = log_level
@@ -34,7 +46,12 @@ class SingletonLogger:
         self._create_handler()
 
     def _update_logger(self, log_level, log_format):
-        """Update existing logger with new level and format."""
+        """
+        Update the logger instance with new log level and format.
+        :param log_level:
+        :param log_format:
+        :return:
+        """
         self._log_level = log_level
         self._log_format = log_format or self._log_format
         self._logger.setLevel(self._log_level)
@@ -43,7 +60,10 @@ class SingletonLogger:
             self._logger.handlers[0].setFormatter(logging.Formatter(self._log_format))
 
     def _create_handler(self):
-        """Create and add a handler to the logger."""
+        """
+        Create a console handler for the logger instance.
+        :return:
+        """
         if not self._logger.handlers:
             console_handler = logging.StreamHandler()
             console_handler.setLevel(self._log_level)
@@ -52,5 +72,8 @@ class SingletonLogger:
             self._logger.addHandler(console_handler)
 
     def get_logger(self):
-        """Return the logger instance."""
+        """
+        Get the logger instance.
+        :return:
+        """
         return self._logger
