@@ -1,4 +1,4 @@
-from src.layers.staging_layer import process_region_data
+from src.layers.staging_layer import process_staging_data
 from src.layers.curated_layer import process_curated_data
 from src.layers.analytical_layer import process_analytical_data
 from src.layers.ml_forecasting_layer import process_ml_forecasting_data
@@ -6,19 +6,19 @@ from src.layers.ml_forecasting_layer import process_ml_forecasting_data
 
 def main():
     regions = ["NSW", "VIC", "QLD", "TAS", "SA"]
-    year = "2024"
+    year = "2020"
 
     for region in regions:
         # Process staging data
-        process_region_data(region, year)
+        process_staging_data(region, year)
 
-        # Process curated data
+        # # Process curated data
         process_curated_data(region, year)
-
-        # Process analytical data
+        #
+        # # Process analytical data
         process_analytical_data(region, year)
-
-        # Process ML and forecasting data
+        #
+        # # Process ML and forecasting data
         process_ml_forecasting_data(region, year)
 
 

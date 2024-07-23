@@ -25,14 +25,14 @@ def read_and_clean_csv(input_path):
     df = spark.read.csv(input_path, header=True, schema=schema)
 
     # Perform data cleaning and transformation
-    df_cleaned = df.withColumn("date", to_timestamp(col("SETTLEMENTDATE"), "yyyy-MM-dd HH:mm:ss")) \
+    df_cleaned = df.withColumn("date", to_timestamp(col("SETTLEMENTDATE"), "yyyy/MM/dd HH:mm:ss")) \
         .drop("SETTLEMENTDATE") \
         .na.fill(0)  # Replace null values with 0
 
     return df_cleaned
 
 
-def process_region_data(region, year):
+def process_staging_data(region, year):
     input_path = f"data/raw/{region}/{year}/*.csv"
     output_path = f"data/staging/{region}/{year}/"
 
