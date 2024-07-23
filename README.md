@@ -62,7 +62,7 @@ as a wholesale market. Understanding AEMO's purpose in this context is essential
    - It calculates how much generators should be paid and how much retailers should pay based on the spot price and the amount of electricity produced or consumed.
 
 5. **Information Provision**
-   - AEMO collects, analyzes, and publishes a wide range of data (including the price and demand data we're processing).
+   - AEMO collects, analyses, and publishes a wide range of data (including the price and demand data we're processing).
    - This information is crucial for market participants to make informed decisions about generation, investment, and trading strategies.
 
 6. **System Security**
@@ -93,7 +93,7 @@ as a wholesale market. Understanding AEMO's purpose in this context is essential
 
 5. **Data Uses**: The insights derived from our data processing can be used by market participants for the same purposes that AEMO provides this data: to inform bidding strategies, investment decisions, and policy making.
 
-Understanding AEMO's role as a wholesale market operator provides crucial context for interpreting and analyzing the price and demand data in our project. It helps explain why this data is structured the way it is, and why it's so valuable for various stakeholders in the Australian energy sector.
+Understanding AEMO's role as a wholesale market operator provides crucial context for interpreting and analysing the price and demand data in our project. It helps explain why this data is structured the way it is, and why it's so valuable for various stakeholders in the Australian energy sector.
 
 ## Data Structure
 
@@ -117,11 +117,11 @@ schema = StructType([
 
 3. **Investment Decisions**: Energy companies and investors use this data to inform decisions about new generation capacity or grid infrastructure.
 
-4. **Policy Making**: Policymakers analyze this data to understand market trends and the effects of various policies on electricity prices and demand.
+4. **Policy Making**: Policymakers analyse this data to understand market trends and the effects of various policies on electricity prices and demand.
 
 5. **Research**: Academics and analysts use this data to study various aspects of the electricity market, including efficiency, competitiveness, and the impact of renewable energy integration.
 
-6. **Consumer Insights**: Large consumers can use this data to optimize their electricity usage and potentially reduce costs.
+6. **Consumer Insights**: Large consumers can use this data to optimise their electricity usage and potentially reduce costs.
 
 ## Data Processing Pipeline
 
@@ -130,7 +130,7 @@ In the context of the data processing project we've been discussing:
 1. **Staging Layer** (`StagingDataProcessor`): 
    - Reads the raw CSV files from AEMO.
    - Performs initial cleaning and validation.
-   - Converts settlement dates to a standardized timestamp format.
+   - Converts settlement dates to a standardised timestamp format.
 
 2. **Curated Layer** (`CuratedDataProcessor`):
    - Aggregates the data, possibly to daily or hourly intervals.
@@ -206,7 +206,7 @@ classDiagram
         -_lock: threading.RLock
         -_logger: logging.Logger
         +__new__(logger_name, log_level, log_format)
-        -_initialize_logger(logger_name, log_level, log_format)
+        -_initialise_logger(logger_name, log_level, log_format)
         -_update_logger(log_level, log_format)
         -_create_handler()
         +get_logger()
@@ -272,8 +272,8 @@ classDiagram
 
 ```mermaid
 graph TD
-    A[Start] --> B[Initialize SparkSession]
-    B --> C[Initialize Logger]
+    A[Start] --> B[Initialise SparkSession]
+    B --> C[Initialise Logger]
     C --> D[Create Data Processors]
     D --> E{Process Staging Data}
     E --> F{Process Curated Data}
