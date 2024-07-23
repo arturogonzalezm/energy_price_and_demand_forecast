@@ -1,27 +1,30 @@
-from src.layers.staging_layer import process_staging_data
-from src.layers.curated_layer import process_curated_data
-from src.layers.analytical_layer import process_analytical_data
-from src.layers.ml_forecasting_layer import process_ml_forecasting_data
+from src.data_processing.data_processor import StagingDataProcessor, CuratedDataProcessor, AnalyticalDataProcessor
+from src.utils.singleton_logger import SingletonLogger
+from src.utils.spark_session import SparkSessionManager
 
 
 def main():
+    spark = SparkSessionManager.get_instance()
+    logger = SingletonLogger().get_logger()
+
     regions = ["NSW", "VIC", "QLD", "TAS", "SA"]
-    year = "2020"
+    year = "2021"
 
-    for region in regions:
-        # TODO: Process one at a time sequentially
-        # Process staging data
-        process_staging_data(region, year)
+    processors = [
+        StagingDataProcessor(spark, logger),
+        CuratedDataProcessor(spark, logger),
+        AnalyticalDataProcessor(spark, logger)
+    ]
 
-        # # Process curated data
-        process_curated_data(region, year)
-        #
-        # # Process analytical data
-        process_analytical_data(region, year)
+    for processor in processors:
+        logger.info(f"Starting {processor.__class__.__name__}")
+        for region in regions:
+            logger.info(f"Processing region: {region}")
+            processor.process_data(region, year)
+        logger.info(f"Completed {processor.__class__.__name__}")
 
-        # Process ML and forecasting data
-        process_ml_forecasting_data(region, year)
+    logger.info("All processing completed")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
