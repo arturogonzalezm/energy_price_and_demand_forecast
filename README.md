@@ -81,7 +81,7 @@ as a wholesale market. Understanding AEMO's purpose in this context is essential
 
 5. **Enabling Renewables Integration**: The market structure allows for the integration of variable renewable energy sources, balancing their output with more dispatchable sources.
 
-## Relevance to Our Data Processing Project
+## Relevance to this AEMO Aggregated Price and Demand DataProject
 
 1. **Price Data**: The Regional Reference Price (RRP) in our data is the wholesale spot price determined through AEMO's market operations.
 
@@ -141,6 +141,38 @@ In the context of the data processing project we've been discussing:
    - Might include features like demand-price ratios or monthly summaries.
 
 This multi-layer approach allows for increasingly refined and valuable insights to be drawn from the raw AEMO data.
+
+## Sequence Diagram
+
+```mermaid
+sequenceDiagram
+    participant Main
+    participant SparkSessionManager
+    participant SingletonLogger
+    participant StagingDataProcessor
+    participant CuratedDataProcessor
+    participant AnalyticalDataProcessor
+
+    Main->>SparkSessionManager: get_instance()
+    Main->>SingletonLogger: get_logger()
+    Main->>StagingDataProcessor: create(spark, logger)
+    Main->>CuratedDataProcessor: create(spark, logger)
+    Main->>AnalyticalDataProcessor: create(spark, logger)
+    
+    loop For each processor
+        Main->>StagingDataProcessor: process_data(region, year)
+        StagingDataProcessor->>StagingDataProcessor: get_input_files(region, year)
+        loop For each input file
+            StagingDataProcessor->>StagingDataProcessor: read_data(input_file)
+            StagingDataProcessor->>StagingDataProcessor: clean_data(df)
+            StagingDataProcessor->>StagingDataProcessor: transform_data(df)
+            StagingDataProcessor->>StagingDataProcessor: feature_engineering(df)
+            StagingDataProcessor->>StagingDataProcessor: write_data(df, region, year, month)
+        end
+        Main->>CuratedDataProcessor: process_data(region, year)
+        Main->>AnalyticalDataProcessor: process_data(region, year)
+    end
+```
 
 # Specs
 
@@ -235,37 +267,6 @@ classDiagram
     DataProcessor <|-- AnalyticalDataProcessor
 ```
 
-## Sequence Diagram
-
-```mermaid
-sequenceDiagram
-    participant Main
-    participant SparkSessionManager
-    participant SingletonLogger
-    participant StagingDataProcessor
-    participant CuratedDataProcessor
-    participant AnalyticalDataProcessor
-
-    Main->>SparkSessionManager: get_instance()
-    Main->>SingletonLogger: get_logger()
-    Main->>StagingDataProcessor: create(spark, logger)
-    Main->>CuratedDataProcessor: create(spark, logger)
-    Main->>AnalyticalDataProcessor: create(spark, logger)
-    
-    loop For each processor
-        Main->>StagingDataProcessor: process_data(region, year)
-        StagingDataProcessor->>StagingDataProcessor: get_input_files(region, year)
-        loop For each input file
-            StagingDataProcessor->>StagingDataProcessor: read_data(input_file)
-            StagingDataProcessor->>StagingDataProcessor: clean_data(df)
-            StagingDataProcessor->>StagingDataProcessor: transform_data(df)
-            StagingDataProcessor->>StagingDataProcessor: feature_engineering(df)
-            StagingDataProcessor->>StagingDataProcessor: write_data(df, region, year, month)
-        end
-        Main->>CuratedDataProcessor: process_data(region, year)
-        Main->>AnalyticalDataProcessor: process_data(region, year)
-    end
-```
 
 ## Flowchart
 
