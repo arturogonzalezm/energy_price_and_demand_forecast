@@ -21,6 +21,8 @@ class SingletonLogger:
                 if not cls._instance:
                     cls._instance = super().__new__(cls)
                     cls._instance._initialize_logger(logger_name, log_level, log_format)
+        else:
+            cls._instance._update_logger(log_level, log_format)
         return cls._instance
 
     def _initialize_logger(self, logger_name, log_level, log_format):
@@ -31,13 +33,23 @@ class SingletonLogger:
         self._log_format = log_format or self.DEFAULT_FORMAT
         self._create_handler()
 
+    def _update_logger(self, log_level, log_format):
+        """Update existing logger with new level and format."""
+        self._log_level = log_level
+        self._log_format = log_format or self._log_format
+        self._logger.setLevel(self._log_level)
+        if self._logger.handlers:
+            self._logger.handlers[0].setLevel(self._log_level)
+            self._logger.handlers[0].setFormatter(logging.Formatter(self._log_format))
+
     def _create_handler(self):
         """Create and add a handler to the logger."""
-        console_handler = logging.StreamHandler()
-        console_handler.setLevel(self._log_level)
-        formatter = logging.Formatter(self._log_format)
-        console_handler.setFormatter(formatter)
-        self._logger.addHandler(console_handler)
+        if not self._logger.handlers:
+            console_handler = logging.StreamHandler()
+            console_handler.setLevel(self._log_level)
+            formatter = logging.Formatter(self._log_format)
+            console_handler.setFormatter(formatter)
+            self._logger.addHandler(console_handler)
 
     def get_logger(self):
         """Return the logger instance."""
