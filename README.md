@@ -2,9 +2,145 @@
 [![PyLint](https://github.com/arturogonzalezm/energy_price_and_demand_forecast/actions/workflows/workflow.yml/badge.svg)](https://github.com/arturogonzalezm/energy_price_and_demand_forecast/actions/workflows/workflow.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](https://opensource.org/licenses/MIT)
 
-# Energy Price and Demand Forecast
+# AEMO Aggregated Price and Demand Data
 
-AEMO Aggregated price and demand data
+## Overview
+
+The Australian Energy Market Operator (AEMO) is responsible for operating Australia's largest gas and electricity markets and power systems. 
+One of the key datasets they provide is the Aggregated Price and Demand Data, which is crucial for understanding the dynamics of the National Electricity Market (NEM).
+
+The Australian Energy Market Operator (AEMO) plays a crucial role in Australia's energy landscape, particularly in operating the National Electricity Market (NEM) 
+as a wholesale market. Understanding AEMO's purpose in this context is essential for grasping the significance of the price and demand data we're processing in our project.
+
+## Key Components
+
+1. **Regional Reference Price (RRP)**
+   - This is the wholesale electricity price for each region in the NEM.
+   - It's calculated every 5 minutes and then averaged over 30-minute intervals.
+   - The RRP is used for settlement purposes in the spot market.
+
+2. **Total Demand**
+   - Represents the total electricity consumption in a region.
+   - Includes both native demand (local consumption) and interstate exports.
+   - Measured in megawatts (MW).
+
+3. **Region**
+   - The NEM is divided into five regions, generally aligning with state boundaries:
+     - New South Wales (NSW)
+     - Victoria (VIC)
+     - Queensland (QLD)
+     - South Australia (SA)
+     - Tasmania (TAS)
+
+4. **Settlement Date**
+   - The date and time for which the data is recorded.
+   - Typically provided in 30-minute intervals.
+
+5. **Period Type**
+   - Indicates whether the data corresponds to a TRADE interval or a NON-TRADE interval.
+   - TRADE intervals are normal trading periods.
+   - NON-TRADE intervals might occur during system restarts or other exceptional circumstances.
+
+## Key Functions of AEMO in the Wholesale Market
+
+1. **Market Operation**
+   - AEMO operates the NEM, which is one of the world's longest interconnected power systems.
+   - It manages the spot market where generators sell electricity and retailers buy it to on-sell to consumers.
+   - The market operates 24/7, with prices set every 5 minutes.
+
+2. **Supply-Demand Balance**
+   - AEMO ensures that electricity supply meets demand in real-time.
+   - It forecasts electricity demand and schedules generation to meet this demand.
+   - When demand changes unexpectedly, AEMO can call on additional generation or demand response to maintain system balance.
+
+3. **Price Setting**
+   - AEMO doesn't set prices directly but facilitates the process where prices are determined by supply and demand.
+   - It calculates and publishes the spot price every 5 minutes based on the highest-priced generation bid needed to meet demand.
+
+4. **Settlement**
+   - AEMO manages the financial settlement process for the wholesale market.
+   - It calculates how much generators should be paid and how much retailers should pay based on the spot price and the amount of electricity produced or consumed.
+
+5. **Information Provision**
+   - AEMO collects, analyzes, and publishes a wide range of data (including the price and demand data we're processing).
+   - This information is crucial for market participants to make informed decisions about generation, investment, and trading strategies.
+
+6. **System Security**
+   - While not directly related to its wholesale market function, AEMO is also responsible for maintaining the security and reliability of the power system.
+   - This includes managing frequency, voltage, and other technical aspects of the grid.
+
+## Importance of the Wholesale Market
+
+1. **Efficiency**: The wholesale market aims to deliver electricity at the lowest possible cost by dispatching the most efficient generators first.
+
+2. **Price Signals**: Wholesale prices provide important signals to the market about where and when new investment in generation or transmission infrastructure is needed.
+
+3. **Risk Management**: The market allows participants to manage price risks through financial hedging instruments.
+
+4. **Facilitating Competition**: The wholesale market structure encourages competition among generators and retailers, which can lead to better outcomes for consumers.
+
+5. **Enabling Renewables Integration**: The market structure allows for the integration of variable renewable energy sources, balancing their output with more dispatchable sources.
+
+## Relevance to Our Data Processing Project
+
+1. **Price Data**: The Regional Reference Price (RRP) in our data is the wholesale spot price determined through AEMO's market operations.
+
+2. **Demand Data**: The Total Demand figures reflect the real-time balance of supply and demand that AEMO manages.
+
+3. **Regional Structure**: The regional division in our data aligns with how AEMO operates the NEM across different states.
+
+4. **Time Intervals**: The 5-minute and 30-minute data intervals in our project correspond to AEMO's pricing and settlement periods.
+
+5. **Data Uses**: The insights derived from our data processing can be used by market participants for the same purposes that AEMO provides this data: to inform bidding strategies, investment decisions, and policy making.
+
+Understanding AEMO's role as a wholesale market operator provides crucial context for interpreting and analyzing the price and demand data in our project. It helps explain why this data is structured the way it is, and why it's so valuable for various stakeholders in the Australian energy sector.
+
+## Data Structure
+
+Based on the schema defined in the `StagingDataProcessor`, the AEMO data likely has the following structure:
+
+```python
+schema = StructType([
+    StructField("REGION", StringType(), True),
+    StructField("SETTLEMENTDATE", StringType(), True),
+    StructField("TOTALDEMAND", DoubleType(), True),
+    StructField("RRP", DoubleType(), True),
+    StructField("PERIODTYPE", StringType(), True),
+])
+```
+
+## Importance and Uses
+
+1. **Market Analysis**: This data is crucial for understanding market dynamics, including how prices respond to changes in demand.
+
+2. **Forecasting**: Historical price and demand data are essential inputs for forecasting future electricity prices and demand.
+
+3. **Investment Decisions**: Energy companies and investors use this data to inform decisions about new generation capacity or grid infrastructure.
+
+4. **Policy Making**: Policymakers analyze this data to understand market trends and the effects of various policies on electricity prices and demand.
+
+5. **Research**: Academics and analysts use this data to study various aspects of the electricity market, including efficiency, competitiveness, and the impact of renewable energy integration.
+
+6. **Consumer Insights**: Large consumers can use this data to optimize their electricity usage and potentially reduce costs.
+
+## Data Processing Pipeline
+
+In the context of the data processing project we've been discussing:
+
+1. **Staging Layer** (`StagingDataProcessor`): 
+   - Reads the raw CSV files from AEMO.
+   - Performs initial cleaning and validation.
+   - Converts settlement dates to a standardized timestamp format.
+
+2. **Curated Layer** (`CuratedDataProcessor`):
+   - Aggregates the data, possibly to daily or hourly intervals.
+   - Calculates additional metrics like average demand and average RRP.
+
+3. **Analytical Layer** (`AnalyticalDataProcessor`):
+   - Performs more complex aggregations and calculations.
+   - Might include features like demand-price ratios or monthly summaries.
+
+This multi-layer approach allows for increasingly refined and valuable insights to be drawn from the raw AEMO data.
 
 # Specs
 
