@@ -2,9 +2,7 @@
 Main module to run data processing for staging, curated, and analytical layers.
 """
 
-from src.data_processing.data_processor import (
-    StagingDataProcessor, CuratedDataProcessor, AnalyticalDataProcessor
-)
+from src.data_processing.data_processor import (StagingDataProcessor, CuratedDataProcessor, AnalyticalDataProcessor)
 from src.utils.singleton_logger import SingletonLogger
 from src.utils.spark_session import SparkSessionManager
 
