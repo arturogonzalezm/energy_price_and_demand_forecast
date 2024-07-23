@@ -9,6 +9,7 @@ def main():
     year = "2020"
 
     for region in regions:
+        # TODO: Process one at a time sequentially
         # Process staging data
         process_staging_data(region, year)
 
@@ -17,8 +18,8 @@ def main():
         #
         # # Process analytical data
         process_analytical_data(region, year)
-        #
-        # # Process ML and forecasting data
+
+        # Process ML and forecasting data
         process_ml_forecasting_data(region, year)
 
 
