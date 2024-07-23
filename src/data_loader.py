@@ -1,13 +1,23 @@
-from pyspark.sql import DataFrame
+"""
+This module provides a DataLoader class with methods to read multiple CSV or Parquet files into a single DataFrame.
+"""
+
 from typing import List
+from pyspark.sql import DataFrame
+
 from src.utils.spark_session import SparkSessionManager
 
 
 class DataLoader:
+    """
+    A utility class for loading data from multiple CSV or Parquet files into a single DataFrame.
+    """
+
     @staticmethod
     def read_csv_files(file_paths: List[str]) -> DataFrame:
         """
         Read multiple CSV files into a single DataFrame.
+
         :param file_paths: List of file paths to read
         :return: Combined DataFrame
         """
@@ -22,6 +32,7 @@ class DataLoader:
     def read_parquet_files(file_paths: List[str]) -> DataFrame:
         """
         Read multiple Parquet files into a single DataFrame.
+
         :param file_paths: List of file paths to read
         :return: Combined DataFrame
         """

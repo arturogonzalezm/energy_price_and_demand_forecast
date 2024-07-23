@@ -1,9 +1,18 @@
-from src.data_processing.data_processor import StagingDataProcessor, CuratedDataProcessor, AnalyticalDataProcessor
+"""
+Main module to run data processing for staging, curated, and analytical layers.
+"""
+
+from src.data_processing.data_processor import (
+    StagingDataProcessor, CuratedDataProcessor, AnalyticalDataProcessor
+)
 from src.utils.singleton_logger import SingletonLogger
 from src.utils.spark_session import SparkSessionManager
 
 
 def main():
+    """
+    Main function to orchestrate data processing.
+    """
     spark = SparkSessionManager.get_instance()
     logger = SingletonLogger().get_logger()
 
@@ -17,11 +26,11 @@ def main():
     ]
 
     for processor in processors:
-        logger.info(f"Starting {processor.__class__.__name__}")
+        logger.info("Starting %s", processor.__class__.__name__)
         for region in regions:
-            logger.info(f"Processing region: {region}")
+            logger.info("Processing region: %s", region)
             processor.process_data(region, year)
-        logger.info(f"Completed {processor.__class__.__name__}")
+        logger.info("Completed %s", processor.__class__.__name__)
 
     logger.info("All processing completed")
 
