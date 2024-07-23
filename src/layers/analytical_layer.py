@@ -1,3 +1,6 @@
+"""
+This module contains the functions to process the analytical data layer.
+"""
 
 import os
 import glob
@@ -7,17 +10,32 @@ from pyspark.sql.functions import col, avg, sum
 from src.utils.spark_session import SparkSessionManager
 from src.utils.singleton_logger import SingletonLogger
 
-spark = SparkSessionManager.get_instance("AnalyticalDataLayer")
+# Get the Spark session and logger
+spark = SparkSessionManager.get_instance()
 logger = SingletonLogger().get_logger()
 
 
 def read_curated_data(region, year, month):
+    """
+    Read curated data for a given region, year, and month.
+    :param region: Region to read data for
+    :param year: Year to read data for
+    :param month: Month to read data for
+    :return: DataFrame containing the curated data
+    :rtype: DataFrame
+    """
     input_path = f"data/curated/{region}/{year}/curated_data_{month}.parquet"
     df = spark.read.parquet(input_path)
     return df
 
 
 def transform_and_aggregate_data(df):
+    """
+    Transform and aggregate the data.
+    :param df: DataFrame containing the curated data
+    :return: Aggregated DataFrame
+    :rtype: DataFrame
+    """
     # Example transformations:
     # - Calculate monthly average demand and price
     df_aggregated = df.groupBy("date").agg(
@@ -30,11 +48,28 @@ def transform_and_aggregate_data(df):
 
 
 def write_analytical_data(df_aggregated, region, year, month):
+    """
+    Write the aggregated data to the analytical data layer.
+    :param df_aggregated: Aggregated DataFrame
+    :param region: Region to write data for
+    :param year: Year to write data for
+    :param month: Month to write data for
+    :return: None
+    :rtype: None
+    """
     output_path = f"data/analytical/{region}/{year}/analytical_data_{month}.parquet"
     df_aggregated.write.mode("overwrite").parquet(output_path)
 
 
 def process_analytical_data(region, year):
+    """
+    Process curated data for a given region and year, aggregate it, and write the aggregated data to the analytical
+    layer.
+    :param region: Region to process
+    :param year: Year to process
+    :return: None
+    :rtype: None
+    """
     input_path = f"data/curated/{region}/{year}/*.parquet"
     output_path = f"data/analytical/{region}/{year}/"
 

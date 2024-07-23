@@ -18,7 +18,7 @@ class SparkSessionManager:
         :rtype: SparkSession
         """
         if cls._instance is None:
-            cls._instance = SparkSession.builder.appName("EmployeeBoss").getOrCreate()
+            cls._instance = SparkSession.builder.appName("DefaultApp").getOrCreate()
         return cls._instance
 
     @classmethod

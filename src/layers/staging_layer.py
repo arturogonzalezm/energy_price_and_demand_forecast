@@ -1,3 +1,8 @@
+"""
+This module contains the functions to read raw data from the data lake, clean and transform it, and write the cleaned
+data to the staging layer.
+"""
+
 import os
 import glob
 from pyspark.sql.functions import col, to_timestamp
@@ -7,7 +12,8 @@ from pyspark.sql.types import StructType, StructField, StringType, DoubleType
 from src.utils.spark_session import SparkSessionManager
 from src.utils.singleton_logger import SingletonLogger
 
-spark = SparkSessionManager.get_instance("StagingDataLayer")
+# Get the Spark session and logger
+spark = SparkSessionManager.get_instance()
 logger = SingletonLogger().get_logger()
 
 # Define the schema for your data
@@ -21,6 +27,12 @@ schema = StructType([
 
 
 def read_and_clean_csv(input_path):
+    """
+    Read a CSV file into a DataFrame and perform data cleaning.
+    :param input_path: Path to the input CSV file
+    :return: Cleaned DataFrame
+    :rtype: DataFrame
+    """
     # Read CSV file into DataFrame with predefined schema
     df = spark.read.csv(input_path, header=True, schema=schema)
 
@@ -33,6 +45,13 @@ def read_and_clean_csv(input_path):
 
 
 def process_staging_data(region, year):
+    """
+    Process raw data for a given region and year, clean it, and write the cleaned data to the staging layer.
+    :param region: Region to process
+    :param year: Year to process
+    :return: None
+    :rtype: None
+    """
     input_path = f"data/raw/{region}/{year}/*.csv"
     output_path = f"data/staging/{region}/{year}/"
 

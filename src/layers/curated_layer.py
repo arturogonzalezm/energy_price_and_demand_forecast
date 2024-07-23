@@ -1,3 +1,7 @@
+"""
+This module contains the logic for the curated data layer.
+"""
+
 import os
 import glob
 
@@ -7,8 +11,8 @@ from pyspark.sql.types import StructType, StructField, StringType, DoubleType
 from src.utils.spark_session import SparkSessionManager
 from src.utils.singleton_logger import SingletonLogger
 
-# Initialize Spark session
-spark = SparkSessionManager.get_instance("CuratedDataLayer")
+# Initialize Spark session and logger
+spark = SparkSessionManager.get_instance()
 logger = SingletonLogger().get_logger()
 
 # Define the schema for your data
@@ -22,12 +26,26 @@ schema = StructType([
 
 
 def read_staged_data(region, year, month):
+    """
+    Read staged data for a given region, year, and month.
+    :param region: Region to read data for
+    :param year: Year to read data for
+    :param month: Month to read data for
+    :return: DataFrame containing the staged data
+    :rtype: DataFrame
+    """
     input_path = f"data/staging/{region}/{year}/cleaned_data_{month}.parquet"
     df = spark.read.parquet(input_path)
     return df
 
 
 def transform_and_curate_data(df):
+    """
+    Transform and curate the data.
+    :param df: DataFrame containing the staged data
+    :return: Curated DataFrame
+    :rtype: DataFrame
+    """
     # Check if SETTLEMENTDATE exists and convert it to date if necessary
     if 'SETTLEMENTDATE' in df.columns:
         df = df.withColumn("date", to_timestamp(col("SETTLEMENTDATE"), "yyyy-MM-dd HH:mm:ss")) \
@@ -48,11 +66,25 @@ def transform_and_curate_data(df):
 
 
 def write_curated_data(df_curated, region, year, month):
+    """
+    Write curated data to the curated layer.
+    :param df_curated: Curated DataFrame
+    :param region: Region to write data for
+    :param year: Year to write data for
+    :param month: Month to write data for
+    :return: None
+    """
     output_path = f"data/curated/{region}/{year}/curated_data_{month}.parquet"
     df_curated.write.mode("overwrite").parquet(output_path)
 
 
 def process_curated_data(region, year):
+    """
+    Process staged data for a given region and year, curate it, and write the curated data to the curated layer.
+    :param region: Region to process
+    :param year: Year to process
+    :return: None
+    """
     input_path = f"data/staging/{region}/{year}/*.parquet"
     output_path = f"data/curated/{region}/{year}/"
 

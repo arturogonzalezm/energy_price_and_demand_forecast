@@ -1,3 +1,7 @@
+"""
+T
+"""
+
 import os
 import glob
 
@@ -14,7 +18,7 @@ from pyspark.sql import SparkSession
 from src.utils.spark_session import SparkSessionManager
 from src.utils.singleton_logger import SingletonLogger
 
-spark = SparkSessionManager.get_instance("MLForecastingLayer")
+spark = SparkSessionManager.get_instance()
 logger = SingletonLogger().get_logger()
 
 # Define the schema for your data

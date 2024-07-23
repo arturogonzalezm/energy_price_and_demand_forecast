@@ -31,7 +31,7 @@ def test_get_instance_creates_new_session():
 
         session = SparkSessionManager.get_instance()
 
-        mock_spark_session.builder.appName.assert_called_once_with("EmployeeBoss")
+        mock_spark_session.builder.appName.assert_called_once_with("DefaultApp")
         mock_builder.getOrCreate.assert_called_once()
         assert isinstance(session, MagicMock)
         assert session == SparkSessionManager._instance
@@ -111,7 +111,7 @@ def test_multiple_get_instance_calls():
         session3 = SparkSessionManager.get_instance()
 
         # Verify that SparkSession.builder.appName().getOrCreate() was called only once
-        mock_spark_session.builder.appName.assert_called_once_with("EmployeeBoss")
+        mock_spark_session.builder.appName.assert_called_once_with("DefaultApp")
         mock_builder.getOrCreate.assert_called_once()
 
         # Verify that all calls return the same instance
