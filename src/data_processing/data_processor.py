@@ -7,7 +7,8 @@ import os
 import glob
 from abc import ABC, abstractmethod
 
-from pyspark.sql.functions import col, avg, sum as sql_sum, to_timestamp
+from pyspark.sql.functions import col, avg, sum as sql_sum, to_timestamp, lag
+from pyspark.sql.window import Window
 from pyspark.sql.types import StructType, StructField, StringType, DoubleType
 
 
@@ -38,8 +39,10 @@ class DataProcessor(ABC):
                     self.logger.info("Cleaned data, now have %d rows", df_cleaned.count())
                     df_transformed = self.transform_data(df_cleaned)
                     self.logger.info("Transformed data, now have %d rows", df_transformed.count())
+                    df_features = self.feature_engineering(df_transformed)
+                    self.logger.info("Feature engineered data, now have %d rows", df_features.count())
                     month = self.extract_month(input_file)
-                    self.write_data(df_transformed, region, year, month)
+                    self.write_data(df_features, region, year, month)
                     self.logger.info("Completed processing %s", input_file)
                 except Exception as e:
                     self.logger.error("Error processing file %s: %s", input_file, str(e))
@@ -64,6 +67,11 @@ class DataProcessor(ABC):
     @abstractmethod
     def transform_data(self, df):
         """Transform the cleaned data."""
+        pass
+
+    @abstractmethod
+    def feature_engineering(self, df):
+        """Perform feature engineering on the transformed data."""
         pass
 
     @abstractmethod
@@ -107,6 +115,15 @@ class StagingDataProcessor(DataProcessor):
         """Transform the cleaned data."""
         return df  # No additional transformation for staging data
 
+    def feature_engineering(self, df):
+        """Perform feature engineering on the transformed data."""
+        window_spec = Window.partitionBy("REGION").orderBy("date")
+        df = df.withColumn("prev_total_demand", lag("TOTALDEMAND").over(window_spec)) \
+               .withColumn("prev_rrp", lag("RRP").over(window_spec))
+        df = df.withColumn("demand_diff", col("TOTALDEMAND") - col("prev_total_demand")) \
+               .withColumn("rrp_diff", col("RRP") - col("prev_rrp"))
+        return df
+
     def write_data(self, df, region, year, month):
         """Write the processed data."""
         output_path = f"data/staging/{region}/{year}/cleaned_data_{month}.parquet"
@@ -148,6 +165,11 @@ class CuratedDataProcessor(DataProcessor):
             sql_sum(col("RRP")).alias("total_rrp")
         )
 
+    def feature_engineering(self, df):
+        """Perform feature engineering on the transformed data."""
+        df = df.withColumn("demand_rrp_ratio", col("total_demand") / col("total_rrp"))
+        return df
+
     def write_data(self, df, region, year, month):
         """Write the processed data."""
         output_path = f"data/curated/{region}/{year}/curated_data_{month}.parquet"
@@ -184,6 +206,11 @@ class AnalyticalDataProcessor(DataProcessor):
             sql_sum(col("total_demand")).alias("monthly_total_demand"),
             sql_sum(col("total_rrp")).alias("monthly_total_rrp")
         )
+
+    def feature_engineering(self, df):
+        """Perform feature engineering on the transformed data."""
+        df = df.withColumn("demand_rrp_ratio", col("monthly_total_demand") / col("monthly_total_rrp"))
+        return df
 
     def write_data(self, df, region, year, month):
         """Write the processed data."""
