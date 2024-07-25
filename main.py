@@ -1,8 +1,9 @@
 """
 Main module to run data processing for staging, curated, and analytical layers.
 """
-
-from src.data_processing.data_processor import (StagingDataProcessor, CuratedDataProcessor, AnalyticalDataProcessor)
+from src.data_processing.analytical_data_processor import AnalyticalDataProcessor
+from src.data_processing.curated_data_processor import CuratedDataProcessor
+from src.data_processing.staging_data_processor import StagingDataProcessor
 from src.utils.singleton_logger import SingletonLogger
 from src.utils.spark_session import SparkSessionManager
 
@@ -15,7 +16,7 @@ def main():
     logger = SingletonLogger().get_logger()
 
     regions = ["NSW", "VIC", "QLD", "TAS", "SA"]
-    year = "2020"
+    year = "2021"
 
     processors = [
         StagingDataProcessor(spark, logger),

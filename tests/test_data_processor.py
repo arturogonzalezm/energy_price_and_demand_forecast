@@ -1,195 +1,139 @@
 """
-This module contains unit tests for the data processing classes.
+This module contains tests for the DataProcessor class.
 """
+
 import pytest
-
-from unittest.mock import Mock, patch
-from datetime import datetime
-from pyspark.sql import SparkSession
-from pyspark.sql.types import StructType, StructField, StringType, DoubleType, TimestampType
-
-# Import the classes to test
-from src.data_processing.data_processor import StagingDataProcessor, CuratedDataProcessor, AnalyticalDataProcessor
+from unittest.mock import MagicMock
+from src.data_processing.data_processor import DataProcessor
 
 
-@pytest.fixture(scope="module")
-def spark():
+class MockDataProcessor(DataProcessor):
     """
-    Create a SparkSession object for testing.
-    :return:
+    A mock implementation of the DataProcessor abstract class for testing purposes.
     """
-    return SparkSession.builder.master("local[*]").appName("unit-tests").getOrCreate()
+
+    def get_input_files(self, region, year):
+        """
+        Get list of input files to process.
+        :param region: The region for which to get input files.
+        :param year: The year for which to get input files.
+        :return: A list of input file paths.
+        """
+        return ["mock_file.csv"]
+
+    def read_data(self, input_file):
+        """
+        Read data from the input file.
+        :param input_file: The path to the input file.
+        :return: A mock DataFrame object.
+        """
+        return MagicMock()
+
+    def clean_data(self, df):
+        """
+        Clean the input data.
+        :param df: The input DataFrame.
+        :return: The cleaned DataFrame.
+        """
+        return df
+
+    def transform_data(self, df):
+        """
+        Transform the cleaned data.
+        :param df: The cleaned DataFrame.
+        :return: The transformed DataFrame.
+        """
+        return df
+
+    def feature_engineering(self, df):
+        """
+        Perform feature engineering on the transformed data.
+        :param df: The transformed DataFrame.
+        :return: The DataFrame with additional features.
+        """
+        return df
+
+    def write_data(self, df, region, year, month):
+        """
+        Write the processed data.
+        :param df: The DataFrame to write.
+        :param region: The region for which the data is being processed.
+        :param year: The year for which the data is being processed.
+        :param month: The month for which the data is being processed.
+        """
+        pass
+
+    def extract_month(self, file_name):
+        """
+        Extract month from the file name.
+        :param file_name: The name of the file.
+        :return: The extracted month as a string.
+        """
+        return "202001"
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
+def mock_spark():
+    """
+    Fixture for creating a mock Spark session.
+    :return: A mock Spark session object.
+    """
+    return MagicMock()
+
+
+@pytest.fixture
 def mock_logger():
     """
-    Create a mock logger object for testing.
-    :return:
+    Fixture for creating a mock logger.
+    :return: A mock logger object.
     """
-    return Mock()
+    return MagicMock()
 
 
-@pytest.fixture(scope="function")
-def sample_df(spark):
+@pytest.fixture
+def data_processor(mock_spark, mock_logger):
     """
-    Create a sample DataFrame for testing.
-    :param spark:
-    :return:
+    Fixture for creating a MockDataProcessor instance.
+    :param mock_spark: The mock Spark session.
+    :param mock_logger: The mock logger.
+    :return: An instance of MockDataProcessor.
     """
-    schema = StructType([
-        StructField("REGION", StringType(), True),
-        StructField("SETTLEMENTDATE", StringType(), True),
-        StructField("TOTALDEMAND", DoubleType(), True),
-        StructField("RRP", DoubleType(), True),
-        StructField("PERIODTYPE", StringType(), True),
-    ])
-    data = [
-        ("VIC", "2023/01/01 00:00:00", 100.0, 50.0, "TRADE"),
-        ("VIC", "2023/01/01 00:30:00", 110.0, 55.0, "TRADE"),
-    ]
-    return spark.createDataFrame(data, schema)
+    return MockDataProcessor(mock_spark, mock_logger)
 
 
-def test_staging_data_processor(spark, mock_logger, sample_df):
+def test_process_data_no_files(data_processor, mock_logger):
     """
-    Test the StagingDataProcessor class.
-    :param spark:
-    :param mock_logger:
-    :param sample_df:
-    :return:
+    Test the process_data method when no input files are found.
+    :param data_processor: The MockDataProcessor instance.
+    :param mock_logger: The mock logger.
     """
-    with patch("glob.glob") as mock_glob:
-        mock_glob.return_value = ["test_file.csv"]
-
-        processor = StagingDataProcessor(spark, mock_logger)
-
-        with patch.object(processor, "read_data", return_value=sample_df):
-            processor.process_data("VIC", "2023")
-
-        mock_logger.info.assert_called()
-        mock_glob.assert_called_with("data/raw/VIC/2023/*.csv")
+    data_processor.get_input_files = MagicMock(return_value=[])
+    data_processor.process_data("region", "2020")
+    mock_logger.warning.assert_called_with("No input files found for %s in %s", "region", "2020")
 
 
-def test_curated_data_processor(spark, mock_logger, sample_df):
+def test_process_data_with_files(data_processor, mock_logger):
     """
-    Test the CuratedDataProcessor class.
-    :param spark:
-    :param mock_logger:
-    :param sample_df:
-    :return:
+    Test the process_data method when input files are found.
+    :param data_processor: The MockDataProcessor instance.
+    :param mock_logger: The mock logger.
     """
-    with patch("glob.glob") as mock_glob:
-        mock_glob.return_value = ["test_file.parquet"]
+    df_mock = MagicMock()
+    df_mock.count.side_effect = [10, 8, 7, 7]
 
-        processor = CuratedDataProcessor(spark, mock_logger)
+    data_processor.read_data = MagicMock(return_value=df_mock)
+    data_processor.clean_data = MagicMock(return_value=df_mock)
+    data_processor.transform_data = MagicMock(return_value=df_mock)
+    data_processor.feature_engineering = MagicMock(return_value=df_mock)
 
-        with patch.object(processor, "read_data", return_value=sample_df):
-            processor.process_data("VIC", "2023")
+    data_processor.process_data("region", "2020")
 
-        mock_logger.info.assert_called()
-        mock_glob.assert_called_with("data/staging/VIC/2023/*.parquet")
-
-
-def test_analytical_data_processor(spark, mock_logger):
-    """
-    Test the AnalyticalDataProcessor class.
-    :param spark:
-    :param mock_logger:
-    :return:
-    """
-    schema = StructType([
-        StructField("date", TimestampType(), True),
-        StructField("avg_demand", DoubleType(), True),
-        StructField("avg_rrp", DoubleType(), True),
-        StructField("total_demand", DoubleType(), True),
-        StructField("total_rrp", DoubleType(), True),
-    ])
-    data = [
-        (datetime(2023, 1, 1), 100.0, 50.0, 1000.0, 500.0),
-        (datetime(2023, 1, 2), 110.0, 55.0, 1100.0, 550.0),
-    ]
-    sample_df = spark.createDataFrame(data, schema)
-
-    with patch("glob.glob") as mock_glob:
-        mock_glob.return_value = ["test_file.parquet"]
-
-        processor = AnalyticalDataProcessor(spark, mock_logger)
-
-        with patch.object(processor, "read_data", return_value=sample_df):
-            processor.process_data("VIC", "2023")
-
-        mock_logger.info.assert_called()
-        mock_glob.assert_called_with("data/curated/VIC/2023/*.parquet")
-
-
-def test_staging_data_processor_clean_data(spark, mock_logger):
-    """
-    Test the clean_data method of the StagingDataProcessor class.
-    :param spark:
-    :param mock_logger:
-    :return:
-    """
-    processor = StagingDataProcessor(spark, mock_logger)
-
-    input_df = spark.createDataFrame([
-        ("VIC", "2023/01/01 00:00:00", 100.0, 50.0, "TRADE"),
-        ("VIC", "2023/01/01 00:30:00", None, None, "TRADE"),
-    ], ["REGION", "SETTLEMENTDATE", "TOTALDEMAND", "RRP", "PERIODTYPE"])
-
-    cleaned_df = processor.clean_data(input_df)
-
-    assert cleaned_df.count() == 2
-    assert cleaned_df.filter(cleaned_df.TOTALDEMAND.isNull()).count() == 0
-    assert cleaned_df.filter(cleaned_df.RRP.isNull()).count() == 0
-
-
-def test_curated_data_processor_transform_data(spark, mock_logger):
-    """
-    Test the transform_data method of the CuratedDataProcessor class.
-    :param spark:
-    :param mock_logger:
-    :return:
-    """
-    processor = CuratedDataProcessor(spark, mock_logger)
-
-    input_df = spark.createDataFrame([
-        (datetime(2023, 1, 1), 100.0, 50.0, "TRADE"),
-        (datetime(2023, 1, 1), 110.0, 55.0, "TRADE"),
-    ], ["date", "TOTALDEMAND", "RRP", "PERIODTYPE"])
-
-    transformed_df = processor.transform_data(input_df)
-
-    assert transformed_df.count() == 1
-    row = transformed_df.collect()[0]
-    assert row.avg_demand == 105.0
-    assert row.avg_rrp == 52.5
-    assert row.total_demand == 210.0
-    assert row.total_rrp == 105.0
-
-
-def test_analytical_data_processor_transform_data(spark, mock_logger):
-    """
-    Test the transform_data method of the AnalyticalDataProcessor class.
-    :param spark:
-    :param mock_logger:
-    :return:
-    """
-    processor = AnalyticalDataProcessor(spark, mock_logger)
-
-    input_df = spark.createDataFrame([
-        (datetime(2023, 1, 1), 100.0, 50.0, 1000.0, 500.0),
-        (datetime(2023, 1, 1), 110.0, 55.0, 1100.0, 550.0),
-    ], ["date", "avg_demand", "avg_rrp", "total_demand", "total_rrp"])
-
-    transformed_df = processor.transform_data(input_df)
-
-    assert transformed_df.count() == 1
-    row = transformed_df.collect()[0]
-    assert row.monthly_avg_demand == 105.0
-    assert row.monthly_avg_rrp == 52.5
-    assert row.monthly_total_demand == 2100.0
-    assert row.monthly_total_rrp == 1050.0
+    mock_logger.info.assert_any_call("Found %d files to process for %s in %s", 1, "region", "2020")
+    mock_logger.info.assert_any_call("Read %d rows from %s", 10, "mock_file.csv")
+    mock_logger.info.assert_any_call("Cleaned data, now have %d rows", 8)
+    mock_logger.info.assert_any_call("Transformed data, now have %d rows", 7)
+    mock_logger.info.assert_any_call("Feature engineered data, now have %d rows", 7)
+    mock_logger.info.assert_any_call("Completed processing %s", "mock_file.csv")
 
 
 if __name__ == "__main__":

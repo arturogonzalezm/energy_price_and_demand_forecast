@@ -5,7 +5,7 @@ import pytest
 from unittest.mock import patch, MagicMock
 from pyspark.sql import DataFrame
 
-from src.data_loader import DataLoader
+from src.data_processing.data_loader import DataLoader
 from src.utils.spark_session import SparkSessionManager
 
 
