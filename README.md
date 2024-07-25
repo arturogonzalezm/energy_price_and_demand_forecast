@@ -4,6 +4,8 @@
 
 # AEMO Aggregated Price and Demand Data
 
+TODO: Data quality framework
+
 ## Overview
 
 The Australian Energy Market Operator (AEMO) is responsible for operating Australia's largest gas and electricity markets and power systems. 
