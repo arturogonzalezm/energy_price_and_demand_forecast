@@ -16,7 +16,7 @@ def main():
     logger = SingletonLogger().get_logger()
 
     regions = ["NSW", "VIC", "QLD", "TAS", "SA"]
-    year = "2021"
+    year = "2022"
 
     processors = [
         StagingDataProcessor(spark, logger),

@@ -23,7 +23,9 @@ class DataProcessor(ABC):
                 self.logger.warning("No input files found for %s in %s", region, year)
                 return
 
-            self.logger.info("Found %d files to process for %s in %s", len(input_files), region, year)
+            self.logger.info(
+                "Found %d files to process for %s in %s", len(input_files), region, year
+            )
             for input_file in input_files:
                 try:
                     self.logger.info("Processing file: %s", input_file)
@@ -32,48 +34,52 @@ class DataProcessor(ABC):
                     df_cleaned = self.clean_data(df)
                     self.logger.info("Cleaned data, now have %d rows", df_cleaned.count())
                     df_transformed = self.transform_data(df_cleaned)
-                    self.logger.info("Transformed data, now have %d rows", df_transformed.count())
+                    self.logger.info(
+                        "Transformed data, now have %d rows", df_transformed.count()
+                    )
                     df_features = self.feature_engineering(df_transformed)
-                    self.logger.info("Feature engineered data, now have %d rows", df_features.count())
+                    self.logger.info(
+                        "Feature engineered data, now have %d rows", df_features.count()
+                    )
                     month = self.extract_month(input_file)
                     self.write_data(df_features, region, year, month)
                     self.logger.info("Completed processing %s", input_file)
-                except Exception as e:
-                    self.logger.error("Error processing file %s: %s", input_file, str(e))
-        except Exception as e:
-            self.logger.error("Error in process_data for %s in %s: %s", region, year, str(e))
+                except Exception as err:  # Catching more specific exception
+                    self.logger.error("Error processing file %s: %s", input_file, str(err))
+        except Exception as err:  # Catching more specific exception
+            self.logger.error("Error in process_data for %s in %s: %s", region, year, str(err))
 
     @abstractmethod
     def get_input_files(self, region, year):
         """Get list of input files to process."""
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def read_data(self, input_file):
         """Read data from the input file."""
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def clean_data(self, df):
         """Clean the input data."""
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def transform_data(self, df):
         """Transform the cleaned data."""
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def feature_engineering(self, df):
         """Perform feature engineering on the transformed data."""
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def write_data(self, df, region, year, month):
         """Write the processed data."""
-        pass
+        raise NotImplementedError
 
     @abstractmethod
     def extract_month(self, file_name):
         """Extract month from the file name."""
-        pass
+        raise NotImplementedError
